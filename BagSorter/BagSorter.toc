@@ -1,0 +1,8 @@
+## Interface: 20504
+## Title: BagSorter
+## Notes: Right-click bags to sort items by category, price, or alphabetically
+## Author: BagSorter Team
+## Version: 1.0.0
+## SavedVariables: BagSorterDB
+
+BagSorter.lua
