@@ -13,10 +13,11 @@ local defaultDB = {
 }
 
 -- Item category constants
-local CATEGORY_ARMOR_WEAPON = 1
-local CATEGORY_FOOD_DRINK = 2
-local CATEGORY_MATERIALS = 3
-local CATEGORY_OTHER = 4
+local CATEGORY_QUEST = 1
+local CATEGORY_ARMOR_WEAPON = 2
+local CATEGORY_FOOD_DRINK = 3
+local CATEGORY_MATERIALS = 4
+local CATEGORY_OTHER = 5
 
 -- Get item category
 local function GetItemCategory(itemLink)
@@ -24,7 +25,9 @@ local function GetItemCategory(itemLink)
     
     local itemName, _, _, _, _, itemType, itemSubType = GetItemInfo(itemLink)
     
-    if itemType == "Armor" or itemType == "Weapon" then
+    if itemType == "Quest" then
+        return CATEGORY_QUEST
+    elseif itemType == "Armor" or itemType == "Weapon" then
         return CATEGORY_ARMOR_WEAPON
     elseif itemType == "Consumable" and (itemSubType == "Food & Drink" or itemSubType == "Food" or itemSubType == "Drink") then
         return CATEGORY_FOOD_DRINK
@@ -132,7 +135,7 @@ local function ShowSortMenu(bagID)
             notCheckable = true
         },
         {
-            text = "Sort by Category (Armor/Weapon, Food/Drink, Materials)",
+            text = "Sort by Category (Quest, Armor/Weapon, Food/Drink, Materials)",
             func = function()
                 BagSorterDB.sortMethod = "category"
                 SortBag(bagID, "category")
@@ -266,7 +269,7 @@ SlashCmdList["BAGSORTER"] = function(msg)
         print("BagSorter: Sort method set to Alphabetical")
     elseif msg == "help" or msg == "" then
         print("BagSorter Commands:")
-        print("  /bagsorter category - Sort by category (armor/weapon, food/drink, materials)")
+        print("  /bagsorter category - Sort by category (quest, armor/weapon, food/drink, materials)")
         print("  /bagsorter price - Sort by price (highest to lowest)")
         print("  /bagsorter alphabetical - Sort alphabetically")
         print("  /bagsorter help - Show this help message")

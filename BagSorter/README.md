@@ -6,7 +6,7 @@ A World of Warcraft: The Burning Crusade Classic Anniversary Edition addon that 
 
 - **Right-click sorting**: Ctrl+Right-click on bag slots to open the sort menu
 - **Multiple sorting methods**:
-  - **Category**: Groups items by type (Armor/Weapon, Food/Drink, Materials, Other)
+  - **Category**: Groups items by type (Quest, Armor/Weapon, Food/Drink, Materials, Other)
   - **Price**: Sorts items by vendor price (highest to lowest)
   - **Alphabetical**: Sorts items alphabetically by name
 - **Persistent settings**: Your preferred sort method is saved between sessions
@@ -46,10 +46,11 @@ Use these commands in the chat to set your default sorting method:
 
 ### Category Sort
 Groups items into categories in this order:
-1. **Armor/Weapon**: All armor pieces and weapons
-2. **Food/Drink**: Consumable food and drinks
-3. **Materials**: Trade goods, reagents, and crafting materials
-4. **Other**: Everything else
+1. **Quest**: Quest items and quest-related materials
+2. **Armor/Weapon**: All armor pieces and weapons
+3. **Food/Drink**: Consumable food and drinks
+4. **Materials**: Trade goods, reagents, and crafting materials
+5. **Other**: Everything else
 
 Within each category, items are sorted alphabetically.
 

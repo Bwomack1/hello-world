@@ -10,7 +10,7 @@ This repository now includes **BagSorter**, a World of Warcraft: The Burning Cru
 
 ### Features
 - Right-click bag sorting with Ctrl+Right-click
-- Sort by category (Armor/Weapon, Food/Drink, Materials)
+- Sort by category (Quest, Armor/Weapon, Food/Drink, Materials)
 - Sort by price (vendor value)
 - Sort alphabetically
 - Slash commands for quick access
