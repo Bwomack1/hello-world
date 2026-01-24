@@ -179,8 +179,10 @@ end
 -- Hook bag frame clicks
 local function HookBagFrames()
     -- Hook the main bag slots (bag bar)
+    -- Try different naming conventions for compatibility
     for i = 0, 4 do
-        local bagButton = _G["CharacterBag" .. i .. "Slot"]
+        -- Try different frame naming patterns for different WoW versions
+        local bagButton = _G["CharacterBag" .. i .. "Slot"] or _G["MainMenuBarBag" .. i]
         if bagButton and not bagButton.BagSorterHooked then
             bagButton:HookScript("OnClick", function(self, button)
                 if button == "RightButton" then
