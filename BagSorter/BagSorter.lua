@@ -112,15 +112,8 @@ local function SortBag(bagID, sortMethod)
         table.sort(items, SortAlphabetically)
     end
     
-    -- Clear the bag first
-    for i = 1, GetContainerNumSlots(bagID) do
-        PickupContainerItem(bagID, i)
-        DeleteCursorItem()
-    end
-    
-    -- Note: In actual WoW, we can't directly place items in bags programmatically
-    -- This is a limitation of the WoW API for security reasons
-    -- Instead, we'll provide visual feedback about the sort order
+    -- Note: Due to WoW API security restrictions, we cannot programmatically move items
+    -- Instead, we'll provide visual feedback showing the recommended sort order
     
     print("BagSorter: Sorted bag " .. bagID .. " by " .. sortMethod)
     print("BagSorter: Note - Due to WoW API limitations, please manually rearrange items in this order:")
@@ -187,11 +180,11 @@ end
 local function HookBagFrames()
     -- Hook the main bag slots (bag bar)
     for i = 0, 4 do
-        local bagButton = getglobal("CharacterBag" .. i .. "Slot")
+        local bagButton = _G["CharacterBag" .. i .. "Slot"]
         if bagButton and not bagButton.BagSorterHooked then
             bagButton:HookScript("OnClick", function(self, button)
                 if button == "RightButton" then
-                    -- Get the bag ID (inverted for bag slots)
+                    -- Bag ID matches the slot index (0-4)
                     local bagID = i
                     if IsControlKeyDown() then
                         ShowSortMenu(bagID)
@@ -203,9 +196,10 @@ local function HookBagFrames()
     end
     
     -- Also hook the individual bag frames if they're open
+    -- Note: Bag index 0 maps to ContainerFrame1, bag 1 to ContainerFrame2, etc.
     for i = 0, 4 do
         local bagName = "ContainerFrame" .. (i + 1)
-        local bagFrame = getglobal(bagName)
+        local bagFrame = _G[bagName]
         if bagFrame then
             if not bagFrame.BagSorterHooked then
                 bagFrame:HookScript("OnShow", function(self)
