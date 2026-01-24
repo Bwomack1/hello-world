@@ -4,6 +4,7 @@ A World of Warcraft: The Burning Crusade Classic Anniversary Edition addon that 
 
 ## Features
 
+- **Minimap button**: Convenient minimap button for quick access to sort options
 - **Right-click sorting**: Ctrl+Right-click on bag slots to open the sort menu
 - **Multiple sorting methods**:
   - **Category**: Groups items by type (Quest, Armor/Weapon, Food/Drink, Materials, Other)
@@ -12,6 +13,7 @@ A World of Warcraft: The Burning Crusade Classic Anniversary Edition addon that 
 - **Persistent settings**: Your preferred sort method is saved between sessions
 - **Easy access**: Sort buttons appear on bag frames when opened
 - **Slash commands**: Quick commands to change sort methods
+- **Draggable**: Move the minimap button to your preferred position
 
 ## Installation
 
@@ -24,22 +26,30 @@ A World of Warcraft: The Burning Crusade Classic Anniversary Edition addon that 
 
 ## Usage
 
-### Method 1: Right-Click Menu
+### Method 1: Minimap Button (NEW!)
+1. Look for the **BagSorter** button on your minimap (bag icon)
+2. **Left-click**: Opens the sort options menu
+3. **Right-click**: Cycles through sort methods (Category → Price → Alphabetical)
+4. **Drag**: Hold left-click and drag to move the button around the minimap
+5. Select your preferred sorting method from the menu
+
+### Method 2: Right-Click Menu
 1. Hold **Ctrl** and **Right-Click** on any bag slot in your bag bar
 2. Select your desired sorting method from the menu
 3. The bag will be sorted according to your selection
 
-### Method 2: Sort Button
+### Method 3: Sort Button
 1. Open a bag by clicking on it
 2. Click the **Sort** button that appears in the top-right corner of the bag frame
 3. Choose your sorting method from the menu
 
-### Method 3: Slash Commands
+### Method 4: Slash Commands
 Use these commands in the chat to set your default sorting method:
 
 - `/bagsorter category` or `/bs cat` - Sort by category
 - `/bagsorter price` or `/bs p` - Sort by price
 - `/bagsorter alphabetical` or `/bs a` - Sort alphabetically
+- `/bagsorter minimap` or `/bs minimap` - Toggle minimap button visibility
 - `/bagsorter help` - Show help information
 
 ## Sorting Methods Explained

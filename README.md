@@ -9,11 +9,13 @@ Changes to waffles
 This repository now includes **BagSorter**, a World of Warcraft: The Burning Crusade Classic Anniversary Edition addon for sorting inventory bags.
 
 ### Features
+- **Minimap button** for easy access to sort options
 - Right-click bag sorting with Ctrl+Right-click
 - Sort by category (Quest, Armor/Weapon, Food/Drink, Materials)
 - Sort by price (vendor value)
 - Sort alphabetically
 - Slash commands for quick access
+- Draggable minimap button
 
 ### Installation
 See the [BagSorter README](BagSorter/README.md) for detailed installation and usage instructions.
@@ -21,4 +23,5 @@ See the [BagSorter README](BagSorter/README.md) for detailed installation and us
 ### Quick Start
 1. Copy the `BagSorter` folder to your WoW `_classic_/Interface/AddOns/` directory
 2. Restart WoW or type `/reload`
-3. Ctrl+Right-click on any bag to sort!
+3. Look for the BagSorter button on your minimap and click it!
+4. Or Ctrl+Right-click on any bag to sort!

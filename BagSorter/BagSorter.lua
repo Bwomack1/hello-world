@@ -9,7 +9,12 @@ BagSorter:RegisterEvent("PLAYER_LOGIN")
 -- Default settings
 local defaultDB = {
     sortMethod = "category", -- Options: "category", "price", "alphabetical"
-    showMenu = true
+    showMenu = true,
+    minimap = {
+        hide = false,
+        minimapPos = 225,
+        radius = 80
+    }
 }
 
 -- Item category constants
@@ -229,6 +234,172 @@ local function HookBagFrames()
     end
 end
 
+-- Minimap button functionality
+local minimapButton = CreateFrame("Button", "BagSorterMinimapButton", Minimap)
+minimapButton:SetFrameStrata("MEDIUM")
+minimapButton:SetWidth(31)
+minimapButton:SetHeight(31)
+minimapButton:SetFrameLevel(8)
+minimapButton:RegisterForClicks("anyUp")
+minimapButton:RegisterForDrag("LeftButton")
+minimapButton:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
+
+-- Create the button icon
+local icon = minimapButton:CreateTexture(nil, "BACKGROUND")
+icon:SetWidth(20)
+icon:SetHeight(20)
+icon:SetPoint("CENTER", 0, 1)
+icon:SetTexture("Interface\\Icons\\INV_Misc_Bag_08")
+
+-- Create the border
+local overlay = minimapButton:CreateTexture(nil, "OVERLAY")
+overlay:SetWidth(53)
+overlay:SetHeight(53)
+overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+overlay:SetPoint("TOPLEFT")
+
+-- Update minimap button position
+local function UpdateMinimapButtonPosition()
+    if not BagSorterDB or not BagSorterDB.minimap then return end
+    
+    local angle = math.rad(BagSorterDB.minimap.minimapPos or 225)
+    local x = math.cos(angle) * (BagSorterDB.minimap.radius or 80)
+    local y = math.sin(angle) * (BagSorterDB.minimap.radius or 80)
+    minimapButton:SetPoint("CENTER", Minimap, "CENTER", x, y)
+end
+
+-- Minimap button tooltip
+minimapButton:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+    GameTooltip:SetText("BagSorter", 1, 1, 1)
+    GameTooltip:AddLine("Left-click: Open sort options", 0.8, 0.8, 0.8)
+    GameTooltip:AddLine("Right-click: Toggle sort method", 0.8, 0.8, 0.8)
+    GameTooltip:AddLine("Drag: Move button", 0.8, 0.8, 0.8)
+    GameTooltip:AddLine(" ", 0.8, 0.8, 0.8)
+    GameTooltip:AddLine("Current: " .. (BagSorterDB and BagSorterDB.sortMethod or "category"), 0, 1, 0)
+    GameTooltip:Show()
+end)
+
+minimapButton:SetScript("OnLeave", function(self)
+    GameTooltip:Hide()
+end)
+
+-- Minimap button click handler
+minimapButton:SetScript("OnClick", function(self, button)
+    if button == "LeftButton" then
+        -- Show options menu
+        local menu = {
+            {
+                text = "BagSorter Options",
+                isTitle = true,
+                notCheckable = true
+            },
+            {
+                text = "Sort by Category",
+                func = function()
+                    BagSorterDB.sortMethod = "category"
+                    print("BagSorter: Sort method set to Category")
+                    CloseDropDownMenus()
+                end,
+                checked = (BagSorterDB.sortMethod == "category"),
+                keepShownOnClick = false
+            },
+            {
+                text = "Sort by Price",
+                func = function()
+                    BagSorterDB.sortMethod = "price"
+                    print("BagSorter: Sort method set to Price")
+                    CloseDropDownMenus()
+                end,
+                checked = (BagSorterDB.sortMethod == "price"),
+                keepShownOnClick = false
+            },
+            {
+                text = "Sort Alphabetically",
+                func = function()
+                    BagSorterDB.sortMethod = "alphabetical"
+                    print("BagSorter: Sort method set to Alphabetical")
+                    CloseDropDownMenus()
+                end,
+                checked = (BagSorterDB.sortMethod == "alphabetical"),
+                keepShownOnClick = false
+            },
+            {
+                text = " ",
+                notClickable = true,
+                notCheckable = true
+            },
+            {
+                text = "Hide Minimap Button",
+                func = function()
+                    BagSorterDB.minimap.hide = true
+                    minimapButton:Hide()
+                    print("BagSorter: Minimap button hidden. Use /bagsorter minimap to show it again.")
+                    CloseDropDownMenus()
+                end,
+                notCheckable = true
+            },
+            {
+                text = "Close",
+                func = function() CloseDropDownMenus() end,
+                notCheckable = true
+            }
+        }
+        
+        if not BagSorter.MinimapDropdown then
+            BagSorter.MinimapDropdown = CreateFrame("Frame", "BagSorterMinimapDropdown", UIParent, "UIDropDownMenuTemplate")
+        end
+        
+        EasyMenu(menu, BagSorter.MinimapDropdown, "cursor", 0, 0, "MENU")
+    elseif button == "RightButton" then
+        -- Cycle through sort methods
+        if BagSorterDB.sortMethod == "category" then
+            BagSorterDB.sortMethod = "price"
+            print("BagSorter: Sort method set to Price")
+        elseif BagSorterDB.sortMethod == "price" then
+            BagSorterDB.sortMethod = "alphabetical"
+            print("BagSorter: Sort method set to Alphabetical")
+        else
+            BagSorterDB.sortMethod = "category"
+            print("BagSorter: Sort method set to Category")
+        end
+    end
+end)
+
+-- Minimap button drag functionality
+minimapButton:SetScript("OnDragStart", function(self)
+    self:LockHighlight()
+    self:SetScript("OnUpdate", function(self)
+        local mx, my = Minimap:GetCenter()
+        local px, py = GetCursorPosition()
+        local scale = Minimap:GetEffectiveScale()
+        px, py = px / scale, py / scale
+        
+        local angle = math.deg(math.atan2(py - my, px - mx))
+        if angle < 0 then
+            angle = angle + 360
+        end
+        
+        BagSorterDB.minimap.minimapPos = angle
+        UpdateMinimapButtonPosition()
+    end)
+end)
+
+minimapButton:SetScript("OnDragStop", function(self)
+    self:UnlockHighlight()
+    self:SetScript("OnUpdate", nil)
+end)
+
+-- Initialize minimap button
+local function InitializeMinimapButton()
+    if BagSorterDB.minimap.hide then
+        minimapButton:Hide()
+    else
+        minimapButton:Show()
+        UpdateMinimapButtonPosition()
+    end
+end
+
 -- Event handler
 BagSorter:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == "BagSorter" then
@@ -241,6 +412,16 @@ BagSorter:SetScript("OnEvent", function(self, event, arg1)
         for k, v in pairs(defaultDB) do
             if BagSorterDB[k] == nil then
                 BagSorterDB[k] = v
+            elseif type(v) == "table" then
+                -- Handle nested tables (like minimap settings)
+                if type(BagSorterDB[k]) ~= "table" then
+                    BagSorterDB[k] = {}
+                end
+                for kk, vv in pairs(v) do
+                    if BagSorterDB[k][kk] == nil then
+                        BagSorterDB[k][kk] = vv
+                    end
+                end
             end
         end
         
@@ -249,6 +430,8 @@ BagSorter:SetScript("OnEvent", function(self, event, arg1)
     elseif event == "PLAYER_LOGIN" then
         -- Hook bag frames after player login
         HookBagFrames()
+        -- Initialize minimap button
+        InitializeMinimapButton()
     end
 end)
 
@@ -267,14 +450,26 @@ SlashCmdList["BAGSORTER"] = function(msg)
     elseif msg == "alphabetical" or msg == "alpha" or msg == "a" then
         BagSorterDB.sortMethod = "alphabetical"
         print("BagSorter: Sort method set to Alphabetical")
+    elseif msg == "minimap" then
+        BagSorterDB.minimap.hide = not BagSorterDB.minimap.hide
+        if BagSorterDB.minimap.hide then
+            minimapButton:Hide()
+            print("BagSorter: Minimap button hidden")
+        else
+            minimapButton:Show()
+            UpdateMinimapButtonPosition()
+            print("BagSorter: Minimap button shown")
+        end
     elseif msg == "help" or msg == "" then
         print("BagSorter Commands:")
         print("  /bagsorter category - Sort by category (quest, armor/weapon, food/drink, materials)")
         print("  /bagsorter price - Sort by price (highest to lowest)")
         print("  /bagsorter alphabetical - Sort alphabetically")
+        print("  /bagsorter minimap - Toggle minimap button")
         print("  /bagsorter help - Show this help message")
         print("")
         print("Usage: Ctrl+Right-click on bag slots to open sort menu")
+        print("Or left-click the minimap button")
         print("Current method: " .. BagSorterDB.sortMethod)
     else
         print("BagSorter: Unknown command. Type /bagsorter help for available commands.")
