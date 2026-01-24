@@ -202,6 +202,8 @@ local function HookBagFrames()
         local bagFrame = _G[bagName]
         if bagFrame then
             if not bagFrame.BagSorterHooked then
+                -- Capture the correct bag ID in the closure
+                local bagID = i
                 bagFrame:HookScript("OnShow", function(self)
                     -- Add a sort button to the bag frame
                     if not self.BagSorterButton then
@@ -211,7 +213,7 @@ local function HookBagFrames()
                         button:SetPoint("TOPRIGHT", self, "TOPRIGHT", -5, -5)
                         button:SetText("Sort")
                         button:SetScript("OnClick", function()
-                            ShowSortMenu(self:GetID())
+                            ShowSortMenu(bagID)
                         end)
                         self.BagSorterButton = button
                     end
