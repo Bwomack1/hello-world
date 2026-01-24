@@ -1,4 +1,4 @@
-## Interface: 20504
+## Interface: 20505
 ## Title: BagSorter
 ## Notes: Right-click bags to sort items by category, price, or alphabetically
 ## Author: BagSorter Team

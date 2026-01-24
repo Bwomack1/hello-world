@@ -104,7 +104,18 @@ end
 
 -- Perform the actual sorting
 local function SortBag(bagID, sortMethod)
+    -- Debug output
+    print("BagSorter: SortBag called with bagID=" .. tostring(bagID) .. ", sortMethod=" .. tostring(sortMethod))
+    
+    -- Check if in combat
+    if InCombatLockdown() then
+        print("BagSorter: Cannot sort bags while in combat!")
+        return
+    end
+    
     local items = CollectBagItems(bagID)
+    
+    print("BagSorter: Found " .. #items .. " items in bag")
     
     if #items == 0 then
         print("BagSorter: Bag is empty or cannot be sorted.")
@@ -120,15 +131,62 @@ local function SortBag(bagID, sortMethod)
         table.sort(items, SortAlphabetically)
     end
     
-    -- Note: Due to WoW API security restrictions, we cannot programmatically move items
-    -- Instead, we'll provide visual feedback showing the recommended sort order
+    print("BagSorter: Sorting bag " .. bagID .. " by " .. sortMethod .. "...")
     
-    print("BagSorter: Sorted bag " .. bagID .. " by " .. sortMethod)
-    print("BagSorter: Note - Due to WoW API limitations, please manually rearrange items in this order:")
+    -- Create target layout
+    local numSlots = GetContainerNumSlots(bagID)
+    local targetSlots = {}
     
-    for i, item in ipairs(items) do
-        print(i .. ". " .. item.name .. " (x" .. item.count .. ")")
+    for i = 1, #items do
+        targetSlots[i] = items[i]
     end
+    
+    -- Use a simpler immediate sorting approach
+    local swapsMade = 0
+    local maxPasses = 50
+    
+    for pass = 1, maxPasses do
+        local swappedThisPass = false
+        
+        for targetSlot = 1, #items do
+            local currentLink = GetContainerItemLink(bagID, targetSlot)
+            local targetItem = targetSlots[targetSlot]
+            
+            if targetItem and currentLink ~= targetItem.link then
+                -- Find where the target item currently is
+                for searchSlot = 1, numSlots do
+                    if searchSlot ~= targetSlot then
+                        local searchLink = GetContainerItemLink(bagID, searchSlot)
+                        
+                        if searchLink == targetItem.link then
+                            -- Check if items are locked
+                            local _, _, searchLocked = GetContainerItemInfo(bagID, searchSlot)
+                            local _, _, targetLocked = GetContainerItemInfo(bagID, targetSlot)
+                            
+                            if not searchLocked and not targetLocked then
+                                -- Perform swap
+                                ClearCursor()
+                                PickupContainerItem(bagID, searchSlot)
+                                PickupContainerItem(bagID, targetSlot)
+                                ClearCursor()
+                                swapsMade = swapsMade + 1
+                                swappedThisPass = true
+                                print("BagSorter: Swapped slots " .. searchSlot .. " and " .. targetSlot)
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        
+        -- If no swaps were made this pass, we're done
+        if not swappedThisPass then
+            break
+        end
+    end
+    
+    print("BagSorter: Bag sorted! Made " .. swapsMade .. " swaps.")
 end
 
 -- Create dropdown menu for sort options
@@ -215,16 +273,43 @@ local function HookBagFrames()
                 -- Capture the correct bag ID in the closure
                 local bagID = i
                 bagFrame:HookScript("OnShow", function(self)
-                    -- Add a sort button to the bag frame
+                    -- Add a sort icon button to the bag frame
                     if not self.BagSorterButton then
-                        local button = CreateFrame("Button", nil, self, "UIPanelButtonTemplate")
-                        button:SetWidth(60)
+                        local button = CreateFrame("Button", nil, self)
+                        button:SetWidth(20)
                         button:SetHeight(20)
-                        button:SetPoint("TOPRIGHT", self, "TOPRIGHT", -5, -5)
-                        button:SetText("Sort")
-                        button:SetScript("OnClick", function()
-                            ShowSortMenu(bagID)
+                        -- Position to the left of the close button to avoid overlap
+                        button:SetPoint("TOPRIGHT", self, "TOPRIGHT", -28, -5)
+                        
+                        -- Create icon texture
+                        local icon = button:CreateTexture(nil, "ARTWORK")
+                        icon:SetAllPoints()
+                        icon:SetTexture("Interface\\Icons\\INV_Misc_Bag_08")
+                        
+                        -- Add highlight texture
+                        local highlight = button:CreateTexture(nil, "HIGHLIGHT")
+                        highlight:SetAllPoints()
+                        highlight:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
+                        highlight:SetBlendMode("ADD")
+                        
+                        -- Tooltip
+                        button:SetScript("OnEnter", function(self)
+                            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                            GameTooltip:SetText("Sort Bag", 1, 1, 1)
+                            GameTooltip:AddLine("Click to sort this bag", 0.8, 0.8, 0.8)
+                            GameTooltip:AddLine("Method: " .. BagSorterDB.sortMethod, 0, 1, 0)
+                            GameTooltip:Show()
                         end)
+                        
+                        button:SetScript("OnLeave", function(self)
+                            GameTooltip:Hide()
+                        end)
+                        
+                        -- Sort using saved method when clicked
+                        button:SetScript("OnClick", function()
+                            SortBag(bagID, BagSorterDB.sortMethod)
+                        end)
+                        
                         self.BagSorterButton = button
                     end
                 end)
